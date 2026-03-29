@@ -37,6 +37,7 @@ class AuthRouter:
         self.router.add_api_route("/api/users/check", self.check_user, methods=["POST"])
         self.router.add_api_route("/api/users/register", self.register_user, methods=["POST"])
         self.router.add_api_route("/api/invite-codes/generate", self.generate_codes, methods=["POST"])
+        self.router.add_api_route("/api/invite-codes/mine", self.list_my_codes, methods=["GET"])
 
     def check_user(self, body: CheckUserRequest, session: Session = Depends(get_db_session)) -> dict:
         if not session:
@@ -126,3 +127,28 @@ class AuthRouter:
 
         logger.info("Generated {} invite codes", len(codes))
         return {"codes": codes}
+
+    def list_my_codes(self, session: Session = Depends(get_db_session)) -> dict:
+        """List all invite codes (most recent first). Shows usage status."""
+        if not session:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        invites = (
+            session.query(InviteCode)
+            .order_by(InviteCode.created_at.desc())
+            .limit(50)
+            .all()
+        )
+
+        return {
+            "invite_codes": [
+                {
+                    "id": inv.id,
+                    "code": inv.code,
+                    "used": inv.used_by_user_id is not None,
+                    "used_at": inv.used_at.isoformat() if inv.used_at else None,
+                    "created_at": inv.created_at.isoformat() if inv.created_at else None,
+                }
+                for inv in invites
+            ]
+        }

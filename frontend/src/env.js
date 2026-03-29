@@ -8,6 +8,8 @@ export const env = createEnv({
 	 */
 	server: {
 		NODE_ENV: z.enum(["development", "test", "production"]),
+		BACKEND_URL: z.string().url(),
+		BACKEND_INTERNAL_KEY: z.string().min(1),
 		GOOGLE_CLIENT_ID: z.string().min(1),
 		GOOGLE_CLIENT_SECRET: z.string().min(1),
 		NEXTAUTH_SECRET: z.string().min(1),
@@ -19,10 +21,7 @@ export const env = createEnv({
 	 * isn't built with invalid env vars. To expose them to the client, prefix them with
 	 * `NEXT_PUBLIC_`.
 	 */
-	client: {
-		NEXT_PUBLIC_BACKEND_URL: z.string().url(),
-		// NEXT_PUBLIC_CLIENTVAR: z.string(),
-	},
+	client: {},
 
 	/**
 	 * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
@@ -30,7 +29,8 @@ export const env = createEnv({
 	 */
 	runtimeEnv: {
 		NODE_ENV: process.env.NODE_ENV,
-		NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
+		BACKEND_URL: process.env.BACKEND_URL,
+		BACKEND_INTERNAL_KEY: process.env.BACKEND_INTERNAL_KEY,
 		GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 		GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
 		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,

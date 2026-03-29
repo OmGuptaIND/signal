@@ -119,3 +119,17 @@ export interface ActiveRunResponse {
 export interface RunListResponse {
 	runs: ActiveRun[];
 }
+
+// --- Invite Codes ---
+
+export interface InviteCode {
+	id: number;
+	code: string;
+	used: boolean;
+	used_at: string | null;
+	created_at: string | null;
+}
+
+export interface InviteCodesResponse {
+	invite_codes: InviteCode[];
+}

@@ -1,14 +1,35 @@
+import base64
+import hashlib
+import hmac
+import json
+import time
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sse_starlette.sse import EventSourceResponse
 
 from ..events import broadcaster
 from ..logging_setup import get_logger
 from ..models_db import AlertSignal, KiteAuthStatus
-from .core import get_db_session
+from .core import get_db_session, get_secrets
 
 logger = get_logger(__name__)
+
+
+def _verify_stream_token(token: str, secret: str) -> bool:
+    """Verify a short-lived HMAC-SHA256 stream token."""
+    try:
+        payload_b64, sig = token.rsplit(".", 1)
+        expected_sig = base64.urlsafe_b64encode(
+            hmac.new(secret.encode(), payload_b64.encode(), hashlib.sha256).digest()
+        ).rstrip(b"=").decode()
+        if not hmac.compare_digest(sig, expected_sig):
+            return False
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64 + "=="))
+        return payload.get("exp", 0) >= time.time()
+    except Exception:
+        return False
+
 
 class SignalsRouter:
     def __init__(self):
@@ -20,7 +41,13 @@ class SignalsRouter:
         self.router.add_api_route("/api/signals/history", self.signals_history, methods=["GET"])
         self.router.add_api_route("/api/auth/status", self.auth_status, methods=["GET"])
 
-    async def signals_stream(self) -> EventSourceResponse:
+    async def signals_stream(
+        self,
+        stream_token: str = Query(...),
+        secrets=Depends(get_secrets),
+    ) -> EventSourceResponse:
+        if not _verify_stream_token(stream_token, secrets.internal_api_key):
+            raise HTTPException(status_code=401, detail="Invalid or expired stream token")
         return EventSourceResponse(broadcaster.stream())
 
     def signals_history(

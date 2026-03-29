@@ -15,12 +15,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 	callbacks: {
 		async signIn({ user, profile }) {
 			const backendUrl =
-				process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://127.0.0.1:8000";
+				process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
+			const internalKey = process.env.BACKEND_INTERNAL_KEY ?? "";
 
 			try {
 				const res = await fetch(`${backendUrl}/api/users/check`, {
 					method: "POST",
-					headers: { "Content-Type": "application/json" },
+					headers: {
+						"Content-Type": "application/json",
+						"X-Internal-Key": internalKey,
+					},
 					body: JSON.stringify({ email: user.email }),
 				});
 
@@ -42,7 +46,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				return `/invite?${params.toString()}`;
 			} catch (err) {
 				console.error("Error checking user:", err);
-				return false;
+				// Backend unreachable — redirect to login with error instead of blocking
+				return "/login?error=BackendUnavailable";
 			}
 		},
 		async jwt({ token, user }) {
