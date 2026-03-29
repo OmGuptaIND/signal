@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query
 from sse_starlette.sse import EventSourceResponse
 
 from ..events import broadcaster
@@ -21,16 +23,24 @@ class SignalsRouter:
     async def signals_stream(self) -> EventSourceResponse:
         return EventSourceResponse(broadcaster.stream())
 
-    def signals_history(self, session=Depends(get_db_session)) -> dict:
+    def signals_history(
+        self,
+        strategy_id: Optional[str] = Query(None),
+        session=Depends(get_db_session),
+    ) -> dict:
         if not session:
             return {"signals": []}
 
         try:
-            signals = session.query(AlertSignal).order_by(AlertSignal.timestamp.desc()).limit(50).all()
+            query = session.query(AlertSignal)
+            if strategy_id:
+                query = query.filter(AlertSignal.strategy_id == strategy_id)
+            signals = query.order_by(AlertSignal.timestamp.desc()).limit(50).all()
             return {
                 "signals": [
                     {
                         "id": s.id,
+                        "strategy_id": s.strategy_id or "template_d",
                         "timestamp": s.timestamp.isoformat(),
                         "index_name": s.index_name,
                         "signal": s.signal,

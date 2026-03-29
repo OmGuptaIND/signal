@@ -37,12 +37,27 @@ export interface KiteCredentialsStatusResponse {
 	redirected_url_has_request_token: boolean;
 }
 
+// --- Strategies ---
+
+export interface Strategy {
+	id: string;
+	name: string;
+	description: string;
+	how_it_works: string;
+	params: Record<string, unknown>;
+}
+
+export interface StrategiesResponse {
+	strategies: Strategy[];
+}
+
 // --- Signals ---
 
 export type SignalDirection = "LONG_BIAS" | "SHORT_BIAS" | "NEUTRAL";
 
 export interface Signal {
 	id: number;
+	strategy_id: string;
 	timestamp: string;
 	index_name: string;
 	signal: SignalDirection;
@@ -84,12 +99,17 @@ export type RunStatus =
 
 export interface ActiveRun {
 	id: number;
+	strategy_id: string;
 	status: RunStatus;
 	started_at: string | null;
 	stopped_at: string | null;
 	token_expires_at: string | null;
 	error_message: string | null;
 	signals_count: number;
+}
+
+export interface ActiveRunsResponse {
+	runs: ActiveRun[];
 }
 
 export interface ActiveRunResponse {

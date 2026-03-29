@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
 	title: "Strategy Engine — Live Terminal",
@@ -24,7 +25,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<html lang="en" className={`dark ${geist.variable} ${geistMono.variable}`}>
-			<body>{children}</body>
+			<body>
+				<Providers>{children}</Providers>
+			</body>
 		</html>
 	);
 }

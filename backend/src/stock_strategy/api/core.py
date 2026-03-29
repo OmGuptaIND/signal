@@ -10,6 +10,7 @@ from ..events import broadcaster
 from ..logging_setup import get_logger
 from ..models_db import AlertSignal
 from ..run_manager import RunManager
+from ..strategy.registry import register_builtin_strategies
 
 logger = get_logger(__name__)
 
@@ -17,6 +18,8 @@ logger = get_logger(__name__)
 _global_secrets = load_secrets(".env")
 _global_db_client = None
 _global_run_manager = None
+
+register_builtin_strategies()
 
 try:
     _global_db_client = DatabaseClient(_global_secrets.database_url)
@@ -77,6 +80,7 @@ class DatabasePoller:
                     for s in new_signals:
                         ready_signals.append({
                             "id": s.id,
+                            "strategy_id": s.strategy_id or "template_d",
                             "timestamp": s.timestamp.isoformat(),
                             "index_name": s.index_name,
                             "signal": s.signal,
