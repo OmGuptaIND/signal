@@ -1,0 +1,151 @@
+backend/src/stock_strategy/api/auth.py
+  c4f7df91a4380ea2 40,130-154
+backend/migrations/versions/add_strategy_id_columns.py
+  a7df713c8c2b0019 1-30
+frontend/src/components/dashboard/strategy-picker-dialog.tsx
+  c4f7df91a4380ea2 1-124
+frontend/src/components/charts/confidence-timeline.tsx
+  c4f7df91a4380ea2 1-101
+.claude/launch.json
+  c4f7df91a4380ea2 1-11
+frontend/src/components/layout/dashboard-shell.tsx
+  c4f7df91a4380ea2 1-40
+frontend/src/app/api/proxy/[...path]/route.ts
+  05d8c9b479628c70 1-78
+frontend/src/app/invite/layout.tsx
+  c4f7df91a4380ea2 1-18
+backend/src/stock_strategy/config.py
+  05d8c9b479628c70 49,84
+frontend/src/hooks/use-sse-stream.ts
+  c4f7df91a4380ea2 1-13,15,17,51,54-56,58-59,62-66
+  05d8c9b479628c70 14,16,18-50,52-53,57,60-61
+frontend/src/store.ts
+  c4f7df91a4380ea2 7,25-31,44-50
+frontend/src/components/layout/top-header.tsx
+  c4f7df91a4380ea2 1-93
+frontend/src/app/(dashboard)/settings/page.tsx
+  c4f7df91a4380ea2 1-585
+frontend/src/components/charts/index-breakdown.tsx
+  c4f7df91a4380ea2 1-102
+frontend/src/app/icon.tsx
+  c4f7df91a4380ea2 1-33
+frontend/src/components/dashboard/signal-filters.tsx
+  c4f7df91a4380ea2 1-81
+frontend/src/lib/api-types.ts
+  c4f7df91a4380ea2 122-135
+frontend/src/components/dashboard/strategy-overview-card.tsx
+  c4f7df91a4380ea2 1-207
+frontend/src/components/charts/signal-distribution.tsx
+  c4f7df91a4380ea2 1-95
+backend/.env.example
+  05d8c9b479628c70 27-31
+frontend/src/components/dashboard/responsive-signal-view.tsx
+  c4f7df91a4380ea2 1-147
+backend/src/stock_strategy/api/signals.py
+  05d8c9b479628c70 1-5,8,14,18-33,44-50
+frontend/src/app/login/page.tsx
+  05d8c9b479628c70 4-5,10-18,88-95
+  c4f7df91a4380ea2 6-8,21-30,34-46,48-76,78-82
+frontend/src/app/(dashboard)/strategy/[strategyId]/page.tsx
+  c4f7df91a4380ea2 1-305
+frontend/.claude/launch.json
+  c4f7df91a4380ea2 1-11
+frontend/src/app/apple-icon.tsx
+  c4f7df91a4380ea2 1-33
+frontend/public/manifest.json
+  c4f7df91a4380ea2 1-16
+frontend/src/app/api/proxy/stream-token/route.ts
+  05d8c9b479628c70 1-29
+frontend/src/components/dashboard/signal-card.tsx
+  c4f7df91a4380ea2 1-132
+frontend/src/app/login/layout.tsx
+  c4f7df91a4380ea2 1-18
+spec/02-authentication-flow.md
+  05d8c9b479628c70 5,7-8,10-20,23-46,48-54,56,58-64,66,68,70,72,74-76,79,81,83,85-95,97-99,101,103,105,107,109,111,113-130,132,136-137,139,141,143,145-152,154,156-162
+frontend/src/env.js
+  05d8c9b479628c70 11-12,24,32-33
+frontend/src/app/api/auth/kite/route.ts
+  05d8c9b479628c70 1,6
+backend/src/stock_strategy/api/__init__.py
+  05d8c9b479628c70 1,3-4,6,9,16-35,46
+frontend/src/hooks/use-initial-data.ts
+  c4f7df91a4380ea2 1-61
+frontend/src/components/layout/bottom-tab-bar.tsx
+  c4f7df91a4380ea2 1-63
+frontend/.env.example
+  05d8c9b479628c70 1-13
+frontend/src/components/layout/app-sidebar.tsx
+  c4f7df91a4380ea2 1-225
+frontend/src/app/(dashboard)/layout.tsx
+  c4f7df91a4380ea2 1-24
+spec/06-database-schema.md
+  05d8c9b479628c70 5,9-36,39,54-55,67-68,77-80,86
+frontend/src/components/layout/connection-pill.tsx
+  c4f7df91a4380ea2 1-197
+frontend/src/app/(dashboard)/layout-metadata.ts
+  c4f7df91a4380ea2 1-9
+spec/05-api-reference.md
+  05d8c9b479628c70 9,11,13-14,16-18,26,35,37,39,41,43,46-49,51-54,56,58,60-69,71-74,76-79,81,83-99,102-105,109-111,113-115,119,121-124,126,128,130-133,136,145,149,158,160-163,167,170,174,176-179,187,209,213,222,227,236,241-254,262-263,267,270-273,279-280,285-286
+spec/04-frontend-dashboard.md
+  05d8c9b479628c70 5,7,10-14,17,19,21,23-38,40-42,44,46,48-55,57,59,61,63-66,68,70,72-76,78,80,82,84,86,88-90,92,94-97,99,101,103-113,115,117,119-124,126,128-134,136,138-142,146-148,150-151
+frontend/src/app/(dashboard)/page.tsx
+  c4f7df91a4380ea2 1-147
+frontend/public/icon.svg
+  c4f7df91a4380ea2 1-5
+frontend/src/components/dashboard/stat-card.tsx
+  c4f7df91a4380ea2 1-2,4,8-13,17-36,40-45,47-61,63-94
+frontend/src/app/layout.tsx
+  c4f7df91a4380ea2 3,8-59
+frontend/src/app/invite/page.tsx
+  c4f7df91a4380ea2 6-10,29-39,56-63,66-91,93-97,99-108,110-115,117-120
+frontend/src/hooks/use-strategy-actions.ts
+  c4f7df91a4380ea2 1-70
+frontend/src/lib/auth.ts
+  05d8c9b479628c70 18-19,24-27,49-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "13a58199ecd7d18d325dad571010213dc30a5590",
+  "prompts": {
+    "05d8c9b479628c70": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88b95c78-5cba-4198-8021-fb8c95b24107",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 728,
+      "total_deletions": 351,
+      "accepted_lines": 753,
+      "overriden_lines": 0
+    },
+    "a7df713c8c2b0019": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "95310e60-0e2b-4f3f-9c08-25cdf048a031",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 195,
+      "total_deletions": 130,
+      "accepted_lines": 213,
+      "overriden_lines": 0
+    },
+    "c4f7df91a4380ea2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a1b7d53-ec03-45d7-9c90-3f8e0c0bb73a",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 3689,
+      "total_deletions": 520,
+      "accepted_lines": 3310,
+      "overriden_lines": 0
+    }
+  }
+}
