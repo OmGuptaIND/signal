@@ -1,0 +1,42 @@
+backend/src/stock_strategy/strategy/oi_momentum.py
+  a7df713c8c2b0019 1-122
+backend/src/stock_strategy/strategy/pcr_shift.py
+  a7df713c8c2b0019 1-134
+README.md
+  73482ebbf4731258 1-204
+backend/src/stock_strategy/strategy/registry.py
+  a7df713c8c2b0019 21,33,56-57,64-69,89-102,104-107,112-126,128,130-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "08678705d59b85f31b63a9c3dbd3a8bbf64e3c79",
+  "prompts": {
+    "73482ebbf4731258": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "433d7311-5ada-4722-bc55-13cf3334acb2",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 204,
+      "total_deletions": 0,
+      "accepted_lines": 204,
+      "overriden_lines": 0
+    },
+    "a7df713c8c2b0019": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "95310e60-0e2b-4f3f-9c08-25cdf048a031",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 304,
+      "total_deletions": 26,
+      "accepted_lines": 304,
+      "overriden_lines": 0
+    }
+  }
+}
