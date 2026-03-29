@@ -1,0 +1,17 @@
+{
+  "symbols": ["NIFTY", "BANKNIFTY", "SENSEX"],
+  "strike_window": 5,
+  "market_start": "09:15",
+  "market_end": "15:30",
+  "timezone": "Asia/Kolkata",
+  "compute_interval_seconds": 60,
+  "csv_path": "data/signals.csv",
+  "dedup_confidence_delta": 0.1,
+  "template_d": {
+    "weights": {"1m": 0.5, "3m": 0.3, "5m": 0.2},
+    "min_oi_delta": 1.0,
+    "signal_threshold": 0.12,
+    "min_consensus_weight": 0.5,
+    "confidence_scale": 2.5
+  }
+}
