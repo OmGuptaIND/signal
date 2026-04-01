@@ -47,6 +47,7 @@ class RuntimeSecrets:
     log_file: str
     database_url: str
     internal_api_key: str
+    frontend_base_url: str
 
 
 def _parse_simple_env(path: Path) -> dict[str, str]:
@@ -82,6 +83,7 @@ def load_secrets(env_path: str = ".env") -> RuntimeSecrets:
         log_file=get("LOG_FILE", ""),
         database_url=get("DATABASE_URL", ""),
         internal_api_key=get("BACKEND_INTERNAL_KEY", ""),
+        frontend_base_url=get("FRONTEND_BASE_URL", ""),
     )
     logger.debug(
         "runtime secrets loaded env_path={} dry_run={} log_level={} json_logs={} log_file_set={}",

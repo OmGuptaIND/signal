@@ -36,9 +36,17 @@ class InternalKeyMiddleware(BaseHTTPMiddleware):
 
 app = FastAPI(title="Stock Strategy API", version="0.1.0", lifespan=lifespan)
 
+_cors_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+_frontend_url = _secrets.frontend_base_url
+if _frontend_url and _frontend_url not in _cors_origins:
+    _cors_origins.append(_frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

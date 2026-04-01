@@ -46,6 +46,8 @@ go.work.sum
 .env.development
 .env.test
 .env.production
+.env.prod
+monies-backend.tar
 
 # Log files
 *.log
