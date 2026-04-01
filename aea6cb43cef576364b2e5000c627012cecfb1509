@@ -1,0 +1,44 @@
+frontend/src/app/(dashboard)/strategy/[strategyId]/page.tsx
+  9338c3be4ef21127 4,20,23,28-37,45,60-68,174-217,280,364-420
+frontend/src/components/dashboard/responsive-signal-view.tsx
+  9338c3be4ef21127 4,10,22,27-30,33-49
+frontend/src/hooks/use-initial-data.ts
+  9338c3be4ef21127 9,19,24,29,57-61,68
+.claude/launch.json
+  9338c3be4ef21127 8-9
+frontend/src/store.ts
+  9338c3be4ef21127 25-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.3",
+  "base_commit_sha": "aea6cb43cef576364b2e5000c627012cecfb1509",
+  "prompts": {
+    "9338c3be4ef21127": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "304c0e88-37f1-44e9-8df4-b8bca8346569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta",
+      "messages": [],
+      "total_additions": 164,
+      "total_deletions": 10,
+      "accepted_lines": 164,
+      "overriden_lines": 0
+    },
+    "b28423e0f7ccf79f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ae4c7ba8-201c-4ea1-bfcb-d412cd176c5c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 20,
+      "overriden_lines": 0
+    }
+  }
+}
