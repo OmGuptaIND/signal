@@ -22,6 +22,9 @@ export const strategiesAtom = atom<Strategy[]>([]);
 
 export const authStatusAtom = atom<AuthStatus | null>(null);
 
+// Full run history (all runs, not just active)
+export const runHistoryAtom = atom<ActiveRun[]>([]);
+
 // SSE connection status
 export const sseConnectedAtom = atom<boolean>(false);
 

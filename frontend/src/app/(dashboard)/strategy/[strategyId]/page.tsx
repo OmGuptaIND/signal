@@ -1,7 +1,7 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { ArrowLeft, Clock, Activity, Square, TrendingUp } from "lucide-react";
+import { ArrowLeft, Clock, Activity, Square, TrendingUp, AlertTriangle, Info, XCircle, Timer } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -17,12 +17,23 @@ import { SignalFilters } from "@/components/dashboard/signal-filters";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { useStrategyActions } from "@/hooks/use-strategy-actions";
 import { cn } from "@/lib/utils";
-import type { SignalDirection } from "@/lib/api-types";
+import type { ActiveRun, SignalDirection } from "@/lib/api-types";
 import {
   activeRunsAtom,
+  runHistoryAtom,
   signalsByStrategyAtom,
   strategiesAtom,
 } from "@/store";
+
+function formatDuration(start: Date, end: Date): string {
+  const ms = end.getTime() - start.getTime();
+  const seconds = Math.floor(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ${seconds % 60}s`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ${minutes % 60}m`;
+}
 
 export default function StrategyDetailPage() {
   const params = useParams<{ strategyId: string }>();
@@ -31,6 +42,7 @@ export default function StrategyDetailPage() {
   const [activeRuns] = useAtom(activeRunsAtom);
   const [signalsByStrategy] = useAtom(signalsByStrategyAtom);
   const [strategies] = useAtom(strategiesAtom);
+  const [runHistory] = useAtom(runHistoryAtom);
   const { handleStopRun, handleStartStrategy } = useStrategyActions();
 
   const [filterIndex, setFilterIndex] = useState<string | null>(null);
@@ -44,6 +56,15 @@ export default function StrategyDetailPage() {
       (r.status === "running" || r.status === "starting"),
   );
   const isRunning = run?.status === "running" || run?.status === "starting";
+
+  // All runs for this strategy (sorted newest first)
+  const strategyRuns = useMemo(
+    () => runHistory.filter((r) => r.strategy_id === strategyId),
+    [runHistory, strategyId],
+  );
+
+  // Latest run (active or most recent from history)
+  const latestRun: ActiveRun | undefined = run ?? strategyRuns[0];
 
   const indices = useMemo(() => {
     const set = new Set(allSignals.map((s) => s.index_name));
@@ -150,6 +171,50 @@ export default function StrategyDetailPage() {
         </div>
       </div>
 
+      {/* Status banner */}
+      {latestRun?.status === "error" && (
+        <div className="flex items-start gap-3 rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3">
+          <XCircle className="mt-0.5 size-4 shrink-0 text-red-400" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-red-400">Strategy encountered an error</p>
+            <p className="mt-0.5 text-xs text-red-400/70">{latestRun.error_message ?? "Unknown error"}</p>
+          </div>
+        </div>
+      )}
+      {latestRun?.status === "expired" && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+          <Timer className="mt-0.5 size-4 shrink-0 text-amber-400" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-amber-400">Kite access token expired</p>
+            <p className="mt-0.5 text-xs text-amber-400/70">
+              Reconnect via Kite to resume data collection. Tokens expire at end of each trading day.
+            </p>
+          </div>
+        </div>
+      )}
+      {isRunning && allSignals.length === 0 && (
+        <div className="flex items-start gap-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-4 py-3">
+          <Info className="mt-0.5 size-4 shrink-0 text-blue-400" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-blue-400">Collecting market data</p>
+            <p className="mt-0.5 text-xs text-blue-400/70">
+              Strategy is running and processing ticks. Signals will appear when market conditions match the strategy&apos;s criteria.
+            </p>
+          </div>
+        </div>
+      )}
+      {!latestRun && (
+        <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3">
+          <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-muted-foreground">Strategy is not running</p>
+            <p className="mt-0.5 text-xs text-muted-foreground/70">
+              Connect to Kite and start the strategy to begin receiving signals.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
@@ -212,7 +277,7 @@ export default function StrategyDetailPage() {
           />
           <Card>
             <CardContent className="p-0 md:p-0">
-              <ResponsiveSignalView signals={filteredSignals} />
+              <ResponsiveSignalView signals={filteredSignals} run={latestRun} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -293,6 +358,63 @@ export default function StrategyDetailPage() {
                         {run.signals_count}
                       </span>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {strategyRuns.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">Run History</h3>
+                  <div className="space-y-2">
+                    {strategyRuns.map((r) => (
+                      <div
+                        key={r.id}
+                        className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2"
+                      >
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[10px] uppercase shrink-0",
+                            r.status === "running"
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                              : r.status === "error"
+                                ? "border-red-500/30 bg-red-500/10 text-red-400"
+                                : r.status === "expired"
+                                  ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                                  : "border-border text-muted-foreground",
+                          )}
+                        >
+                          {r.status}
+                        </Badge>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="font-mono text-muted-foreground">
+                              #{r.id}
+                            </span>
+                            <span className="text-muted-foreground/60">
+                              {r.started_at
+                                ? new Date(r.started_at).toLocaleString()
+                                : "—"}
+                            </span>
+                            {r.signals_count > 0 && (
+                              <span className="text-muted-foreground">
+                                {r.signals_count} signal{r.signals_count !== 1 ? "s" : ""}
+                              </span>
+                            )}
+                          </div>
+                          {r.error_message && (
+                            <p className="mt-0.5 text-xs text-red-400/70 truncate" title={r.error_message}>
+                              {r.error_message}
+                            </p>
+                          )}
+                        </div>
+                        {r.stopped_at && r.started_at && (
+                          <span className="text-[10px] text-muted-foreground/50 font-mono shrink-0">
+                            {formatDuration(new Date(r.started_at), new Date(r.stopped_at))}
+                          </span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

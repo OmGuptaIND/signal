@@ -1,12 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { Signal } from "@/lib/api-types";
+import type { ActiveRun, Signal } from "@/lib/api-types";
 import { SignalCard } from "./signal-card";
 
 interface ResponsiveSignalViewProps {
   signals: Signal[];
   maxItems?: number;
+  run?: ActiveRun;
 }
 
 const signalConfig = {
@@ -18,15 +19,34 @@ const signalConfig = {
 export function ResponsiveSignalView({
   signals,
   maxItems,
+  run,
 }: ResponsiveSignalViewProps) {
   const items = maxItems ? signals.slice(0, maxItems) : signals;
 
   if (items.length === 0) {
+    const isRunning = run?.status === "running" || run?.status === "starting";
+    const isError = run?.status === "error";
+    const isExpired = run?.status === "expired";
+
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-sm text-muted-foreground">No signals yet</p>
-        <p className="mt-1 text-xs text-muted-foreground/60">
-          Signals will appear here when the strategy starts processing data.
+        <p className="text-sm text-muted-foreground">
+          {isError
+            ? "Strategy stopped due to an error"
+            : isExpired
+              ? "Session expired"
+              : isRunning
+                ? "Collecting market data..."
+                : "No signals yet"}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground/60 max-w-sm">
+          {isError
+            ? run.error_message ?? "Check the Details tab for more information."
+            : isExpired
+              ? "Reconnect via Kite to resume. Tokens expire at end of each trading day."
+              : isRunning
+                ? "No conditions have triggered yet. Signals appear when market data matches the strategy's criteria."
+                : "Start the strategy to begin receiving signals."}
         </p>
       </div>
     );

@@ -6,6 +6,7 @@ import type { ActiveRun, AuthStatusResponse, Signal, Strategy } from "@/lib/api-
 import {
   activeRunsAtom,
   authStatusAtom,
+  runHistoryAtom,
   signalsByStrategyAtom,
   strategiesAtom,
 } from "@/store";
@@ -15,15 +16,17 @@ export function useInitialData() {
   const [, setAuthStatus] = useAtom(authStatusAtom);
   const [, setActiveRuns] = useAtom(activeRunsAtom);
   const [, setStrategies] = useAtom(strategiesAtom);
+  const [, setRunHistory] = useAtom(runHistoryAtom);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const [authRes, histRes, runsRes, stratRes] = await Promise.all([
+        const [authRes, histRes, runsRes, stratRes, runHistRes] = await Promise.all([
           fetch("/api/proxy/auth/status"),
           fetch("/api/proxy/signals/history"),
           fetch("/api/proxy/runs/active"),
           fetch("/api/proxy/strategies"),
+          fetch("/api/proxy/runs"),
         ]);
 
         if (authRes.ok) {
@@ -51,11 +54,16 @@ export function useInitialData() {
           const stratData = await stratRes.json();
           setStrategies(stratData.strategies as Strategy[]);
         }
+
+        if (runHistRes.ok) {
+          const runHistData = await runHistRes.json();
+          setRunHistory(runHistData.runs as ActiveRun[]);
+        }
       } catch (err) {
         console.error("Failed to load initial data", err);
       }
     };
 
     void fetchInitialData();
-  }, [setSignalsByStrategy, setAuthStatus, setActiveRuns, setStrategies]);
+  }, [setSignalsByStrategy, setAuthStatus, setActiveRuns, setStrategies, setRunHistory]);
 }
