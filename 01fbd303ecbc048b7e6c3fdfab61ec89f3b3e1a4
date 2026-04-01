@@ -1,0 +1,56 @@
+backend/deploy/inventory.ini
+  b28423e0f7ccf79f 2
+backend/deploy/Caddyfile
+  b28423e0f7ccf79f 1
+backend/Dockerfile
+  b28423e0f7ccf79f 1-28
+backend/src/stock_strategy/api/__init__.py
+  b28423e0f7ccf79f 39-46,49
+backend/Makefile
+  9338c3be4ef21127 152
+  b28423e0f7ccf79f 9-22,25-29,59-78,147-151,153-228
+backend/deploy/docker-compose.yml
+  b28423e0f7ccf79f 3,6,8
+.gitignore
+  b28423e0f7ccf79f 49-50
+backend/deploy/playbook.yml
+  b28423e0f7ccf79f 6,37,39,57-78,80-98,101-102,104,125,129,139-140
+backend/deploy/redeploy.yml
+  9338c3be4ef21127 55-61
+  b28423e0f7ccf79f 6,9-50,52
+backend/src/stock_strategy/config.py
+  b28423e0f7ccf79f 50,86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "01fbd303ecbc048b7e6c3fdfab61ec89f3b3e1a4",
+  "prompts": {
+    "9338c3be4ef21127": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "304c0e88-37f1-44e9-8df4-b8bca8346569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 18,
+      "total_deletions": 15,
+      "accepted_lines": 9,
+      "overriden_lines": 0
+    },
+    "b28423e0f7ccf79f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ae4c7ba8-201c-4ea1-bfcb-d412cd176c5c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 736,
+      "total_deletions": 205,
+      "accepted_lines": 653,
+      "overriden_lines": 0
+    }
+  }
+}
