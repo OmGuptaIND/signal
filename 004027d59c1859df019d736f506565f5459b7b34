@@ -1,0 +1,62 @@
+frontend/src/lib/api-types.ts
+  9338c3be4ef21127 89-131
+frontend/src/hooks/use-sse-stream.ts
+  9338c3be4ef21127 5-10,16-17,38,46-53,82
+  95f16de364a5790b 54
+frontend/src/store.ts
+  9338c3be4ef21127 6-7,30-32,34-35
+  95f16de364a5790b 33
+backend/src/stock_strategy/run_manager.py
+  9338c3be4ef21127 19,254,289-307,313-315,319,323,331-348,351-352
+frontend/src/app/(dashboard)/strategy/[strategyId]/page.tsx
+  9338c3be4ef21127 21-22,46-47,50-51,206
+  95f16de364a5790b 4,15,72,74,76,78-83,86,88,97,104,115-128,130,141,143-144,150,152-153,159,161-164,168-170,173-176,181-189,192-205,207-225,227-244,246-259,261-266,321-341,343-350,377
+frontend/src/components/dashboard/responsive-signal-view.tsx
+  95f16de364a5790b 3-4,6,8-11,15-20,23-48,50-53,55-58,60-88,90-95,97,99,101,103,105,108-109,112-115,117-118,125-145,147,151-154,158-167,169-176,182-185,187-189,192-194,197,200-203,208-222,224-243,245-248,250-255,257-258,260-261,263,271-298,301-373
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.3",
+  "base_commit_sha": "004027d59c1859df019d736f506565f5459b7b34",
+  "prompts": {
+    "9338c3be4ef21127": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "304c0e88-37f1-44e9-8df4-b8bca8346569",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta",
+      "messages": [],
+      "total_additions": 308,
+      "total_deletions": 17,
+      "accepted_lines": 129,
+      "overriden_lines": 0
+    },
+    "95f16de364a5790b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e2930bb-976c-49bd-a065-7f5e23f293db",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta",
+      "messages": [],
+      "total_additions": 489,
+      "total_deletions": 455,
+      "accepted_lines": 480,
+      "overriden_lines": 2
+    },
+    "b28423e0f7ccf79f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ae4c7ba8-201c-4ea1-bfcb-d412cd176c5c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 20,
+      "overriden_lines": 0
+    }
+  }
+}
