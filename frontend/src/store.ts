@@ -3,6 +3,8 @@ import { atom } from "jotai";
 import type {
 	ActiveRun,
 	AuthStatusResponse,
+	EngineHeartbeat,
+	Evaluation,
 	Signal,
 	SignalDirection,
 	Strategy,
@@ -24,6 +26,12 @@ export const authStatusAtom = atom<AuthStatus | null>(null);
 
 // Full run history (all runs, not just active)
 export const runHistoryAtom = atom<ActiveRun[]>([]);
+
+// Engine heartbeats (latest per strategy)
+export const engineHeartbeatsAtom = atom<Record<string, EngineHeartbeat>>({});
+
+// Recent evaluations per strategy (last 200)
+export const recentEvaluationsAtom = atom<Record<string, Evaluation[]>>({});
 
 // SSE connection status
 export const sseConnectedAtom = atom<boolean>(false);

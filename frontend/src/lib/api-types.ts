@@ -86,7 +86,49 @@ export interface SSEConnectedEvent {
 	data: { message: string };
 }
 
-export type SSEEvent = SSENewSignalEvent | SSEConnectedEvent;
+export interface EngineHeartbeat {
+	run_id: number;
+	strategy_id: string;
+	status: string;
+	ticks_processed: number;
+	snapshots: number;
+	alerts: number;
+	evaluations: number;
+	transitions: number;
+	current_minute: string | null;
+	eta_seconds: number;
+	stale_indices: string[];
+	spot_ticks: number;
+	option_ticks: number;
+}
+
+export interface Evaluation {
+	run_id: number;
+	strategy_id: string;
+	timestamp: string;
+	index_name: string;
+	signal: SignalDirection;
+	confidence: number;
+	total_delta: number;
+	weighted_total_delta: number;
+	votes: Record<string, number>;
+	reason: string;
+	spot_price: number;
+	atm_strike: number;
+	was_emitted: boolean;
+}
+
+export interface SSEHeartbeatEvent {
+	type: "heartbeat";
+	data: EngineHeartbeat;
+}
+
+export interface SSEEvaluationEvent {
+	type: "evaluation";
+	data: Evaluation;
+}
+
+export type SSEEvent = SSENewSignalEvent | SSEConnectedEvent | SSEHeartbeatEvent | SSEEvaluationEvent;
 
 // --- Runs ---
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { ArrowLeft, Clock, Activity, Square, TrendingUp, AlertTriangle, Info, XCircle, Timer } from "lucide-react";
+import { ArrowLeft, Activity, Square, AlertTriangle, Info, XCircle, Timer, Radio, Zap } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -12,14 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfidenceTimeline } from "@/components/charts/confidence-timeline";
 import { IndexBreakdown } from "@/components/charts/index-breakdown";
 import { SignalDistribution } from "@/components/charts/signal-distribution";
-import { ResponsiveSignalView } from "@/components/dashboard/responsive-signal-view";
-import { SignalFilters } from "@/components/dashboard/signal-filters";
-import { StatCard } from "@/components/dashboard/stat-card";
+import { LiveFeedTable } from "@/components/dashboard/responsive-signal-view";
 import { useStrategyActions } from "@/hooks/use-strategy-actions";
 import { cn } from "@/lib/utils";
 import type { ActiveRun, SignalDirection } from "@/lib/api-types";
 import {
   activeRunsAtom,
+  engineHeartbeatsAtom,
+  recentEvaluationsAtom,
   runHistoryAtom,
   signalsByStrategyAtom,
   strategiesAtom,
@@ -43,7 +43,12 @@ export default function StrategyDetailPage() {
   const [signalsByStrategy] = useAtom(signalsByStrategyAtom);
   const [strategies] = useAtom(strategiesAtom);
   const [runHistory] = useAtom(runHistoryAtom);
+  const [heartbeats] = useAtom(engineHeartbeatsAtom);
+  const [evaluationsMap] = useAtom(recentEvaluationsAtom);
   const { handleStopRun, handleStartStrategy } = useStrategyActions();
+
+  const heartbeat = heartbeats[strategyId];
+  const evaluations = evaluationsMap[strategyId] || [];
 
   const [filterIndex, setFilterIndex] = useState<string | null>(null);
   const [filterDirection, setFilterDirection] = useState<SignalDirection | null>(null);
@@ -57,64 +62,30 @@ export default function StrategyDetailPage() {
   );
   const isRunning = run?.status === "running" || run?.status === "starting";
 
-  // All runs for this strategy (sorted newest first)
   const strategyRuns = useMemo(
     () => runHistory.filter((r) => r.strategy_id === strategyId),
     [runHistory, strategyId],
   );
 
-  // Latest run (active or most recent from history)
   const latestRun: ActiveRun | undefined = run ?? strategyRuns[0];
 
+  // Unique indices from evaluations for filter pills
   const indices = useMemo(() => {
-    const set = new Set(allSignals.map((s) => s.index_name));
+    const set = new Set(evaluations.map((e) => e.index_name));
     return Array.from(set).sort();
-  }, [allSignals]);
+  }, [evaluations]);
 
-  const filteredSignals = useMemo(() => {
-    let signals = allSignals;
-    if (filterIndex) {
-      signals = signals.filter((s) => s.index_name === filterIndex);
-    }
-    if (filterDirection) {
-      signals = signals.filter((s) => s.signal === filterDirection);
-    }
-    return signals;
-  }, [allSignals, filterIndex, filterDirection]);
-
-  const summary = useMemo(() => {
-    if (allSignals.length === 0) {
-      return { dominant: "—", long: 0, short: 0, neutral: 0, avgConfidence: 0 };
-    }
-    const long = allSignals.filter((s) => s.signal === "LONG_BIAS").length;
-    const short = allSignals.filter((s) => s.signal === "SHORT_BIAS").length;
-    const neutral = allSignals.length - long - short;
-    const avgConfidence =
-      allSignals.reduce((acc, s) => acc + Number(s.confidence || 0), 0) /
-      allSignals.length;
-    const dominant =
-      long >= short && long >= neutral
-        ? "LONG"
-        : short >= long && short >= neutral
-          ? "SHORT"
-          : "NEUTRAL";
-    return { dominant, long, short, neutral, avgConfidence };
-  }, [allSignals]);
-
-  const firstSignal = allSignals[0];
-  const lastSignalTime =
-    firstSignal
-      ? new Date(firstSignal.timestamp).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        })
-      : "—";
+  const directions: { value: SignalDirection | null; label: string }[] = [
+    { value: null, label: "All" },
+    { value: "LONG_BIAS", label: "Long" },
+    { value: "SHORT_BIAS", label: "Short" },
+    { value: "NEUTRAL", label: "Neutral" },
+  ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <Link href="/">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -123,14 +94,14 @@ export default function StrategyDetailPage() {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold tracking-tight">
+              <h1 className="text-lg font-semibold tracking-tight">
                 {strategy?.name ?? strategyId}
               </h1>
               {run?.status && (
                 <Badge
                   variant="outline"
                   className={cn(
-                    "text-xs uppercase",
+                    "text-[10px] uppercase",
                     run.status === "running"
                       ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                       : run.status === "starting"
@@ -141,8 +112,22 @@ export default function StrategyDetailPage() {
                   {run.status}
                 </Badge>
               )}
+              {/* Engine heartbeat mini stats */}
+              {heartbeat && (
+                <div className="hidden sm:flex items-center gap-3 ml-2 text-[10px] text-muted-foreground/50">
+                  <span>{heartbeat.ticks_processed.toLocaleString()} ticks</span>
+                  <span>{heartbeat.snapshots} snaps</span>
+                  <span>{heartbeat.evaluations} evals</span>
+                  {heartbeat.stale_indices.length > 0 && (
+                    <span className="text-amber-400 flex items-center gap-0.5">
+                      <AlertTriangle className="size-2.5" />
+                      stale: {heartbeat.stale_indices.join(", ")}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {strategy?.description ?? `Strategy ID: ${strategyId}`}
             </p>
           </div>
@@ -153,131 +138,132 @@ export default function StrategyDetailPage() {
               variant="destructive"
               size="sm"
               onClick={() => handleStopRun(run.id)}
-              className="gap-1.5"
+              className="gap-1.5 h-7 text-xs"
             >
-              <Square className="size-3.5" />
-              Stop Strategy
+              <Square className="size-3" />
+              Stop
             </Button>
           ) : (
             <Button
               size="sm"
               onClick={() => handleStartStrategy(strategyId)}
-              className="gap-1.5"
+              className="gap-1.5 h-7 text-xs"
             >
-              <Activity className="size-3.5" />
-              Start Strategy
+              <Activity className="size-3" />
+              Start
             </Button>
           )}
         </div>
       </div>
 
-      {/* Status banner */}
+      {/* Status banners (compact) */}
       {latestRun?.status === "error" && (
-        <div className="flex items-start gap-3 rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3">
-          <XCircle className="mt-0.5 size-4 shrink-0 text-red-400" />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-red-400">Strategy encountered an error</p>
-            <p className="mt-0.5 text-xs text-red-400/70">{latestRun.error_message ?? "Unknown error"}</p>
-          </div>
+        <div className="flex items-center gap-2 rounded-md border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs">
+          <XCircle className="size-3.5 shrink-0 text-red-400" />
+          <span className="text-red-400 font-medium">Error:</span>
+          <span className="text-red-400/70 truncate">{latestRun.error_message ?? "Unknown error"}</span>
         </div>
       )}
       {latestRun?.status === "expired" && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <Timer className="mt-0.5 size-4 shrink-0 text-amber-400" />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-amber-400">Kite access token expired</p>
-            <p className="mt-0.5 text-xs text-amber-400/70">
-              Reconnect via Kite to resume data collection. Tokens expire at end of each trading day.
-            </p>
-          </div>
+        <div className="flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs">
+          <Timer className="size-3.5 shrink-0 text-amber-400" />
+          <span className="text-amber-400">Kite token expired. Reconnect to resume.</span>
         </div>
       )}
-      {isRunning && allSignals.length === 0 && (
-        <div className="flex items-start gap-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-4 py-3">
-          <Info className="mt-0.5 size-4 shrink-0 text-blue-400" />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-blue-400">Collecting market data</p>
-            <p className="mt-0.5 text-xs text-blue-400/70">
-              Strategy is running and processing ticks. Signals will appear when market conditions match the strategy&apos;s criteria.
-            </p>
-          </div>
+      {isRunning && evaluations.length === 0 && allSignals.length === 0 && (
+        <div className="flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-500/5 px-3 py-2 text-xs">
+          <Info className="size-3.5 shrink-0 text-blue-400" />
+          <span className="text-blue-400">Collecting market data... evaluations will appear shortly.</span>
         </div>
       )}
-      {!latestRun && (
-        <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3">
-          <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-muted-foreground">Strategy is not running</p>
-            <p className="mt-0.5 text-xs text-muted-foreground/70">
-              Connect to Kite and start the strategy to begin receiving signals.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Stats row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard
-          icon={Activity}
-          label="Signals"
-          value={allSignals.length}
-          compact
-        />
-        <StatCard
-          icon={Clock}
-          label="Last Signal"
-          value={lastSignalTime}
-          compact
-        />
-        <StatCard
-          icon={TrendingUp}
-          label="Dominant Bias"
-          value={summary.dominant}
-          variant={
-            summary.dominant === "LONG"
-              ? "success"
-              : summary.dominant === "SHORT"
-                ? "danger"
-                : "default"
-          }
-          compact
-        />
-        <StatCard
-          icon={Activity}
-          label="Avg Confidence"
-          value={`${(summary.avgConfidence * 100).toFixed(0)}%`}
-          subtitle={`L${summary.long} S${summary.short} N${summary.neutral}`}
-          variant={
-            summary.avgConfidence >= 0.7
-              ? "success"
-              : summary.avgConfidence >= 0.4
-                ? "warning"
-                : "default"
-          }
-          compact
-        />
-      </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="signals" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="signals">Signals</TabsTrigger>
-          <TabsTrigger value="charts">Charts</TabsTrigger>
-          <TabsTrigger value="details">Details</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="live" className="space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          <TabsList className="h-8">
+            <TabsTrigger value="live" className="text-xs h-7 px-3">Live Feed</TabsTrigger>
+            <TabsTrigger value="charts" className="text-xs h-7 px-3">Charts</TabsTrigger>
+            <TabsTrigger value="details" className="text-xs h-7 px-3">Details</TabsTrigger>
+          </TabsList>
 
-        {/* Signals tab */}
-        <TabsContent value="signals" className="space-y-4">
-          <SignalFilters
-            selectedIndex={filterIndex}
-            selectedDirection={filterDirection}
-            onIndexChange={setFilterIndex}
-            onDirectionChange={setFilterDirection}
-            indices={indices}
-          />
-          <Card>
+          {/* Inline filter toolbar (only on Live Feed tab) */}
+        </div>
+
+        {/* Live Feed tab */}
+        <TabsContent value="live" className="space-y-0 mt-0">
+          {/* Filter toolbar */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            {/* Index pills */}
+            <div className="flex items-center gap-0.5 rounded-md border border-border bg-muted/30 p-0.5">
+              <button
+                type="button"
+                onClick={() => setFilterIndex(null)}
+                className={cn(
+                  "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
+                  filterIndex === null
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                All
+              </button>
+              {indices.map((idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setFilterIndex(idx)}
+                  className={cn(
+                    "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
+                    filterIndex === idx
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {idx}
+                </button>
+              ))}
+            </div>
+
+            {/* Direction pills */}
+            <div className="flex items-center gap-0.5 rounded-md border border-border bg-muted/30 p-0.5">
+              {directions.map((d) => (
+                <button
+                  key={d.label}
+                  type="button"
+                  onClick={() => setFilterDirection(d.value)}
+                  className={cn(
+                    "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
+                    filterDirection === d.value
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Live indicator */}
+            {isRunning && (
+              <div className="flex items-center gap-1.5 ml-auto text-[10px] text-emerald-400/60">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                </span>
+                Live
+              </div>
+            )}
+          </div>
+
+          {/* Spreadsheet */}
+          <Card className="overflow-hidden">
             <CardContent className="p-0 md:p-0">
-              <ResponsiveSignalView signals={filteredSignals} run={latestRun} />
+              <LiveFeedTable
+                evaluations={evaluations}
+                filterIndex={filterIndex}
+                filterDirection={filterDirection}
+                run={latestRun}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -332,6 +318,39 @@ export default function StrategyDetailPage() {
                 </div>
               )}
 
+              {/* Engine status */}
+              {heartbeat && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">Engine Status</h3>
+                  <div className="grid gap-2 sm:grid-cols-4">
+                    <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Ticks</p>
+                      <p className="text-sm font-mono font-medium">{heartbeat.ticks_processed.toLocaleString()}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Snapshots</p>
+                      <p className="text-sm font-mono font-medium">{heartbeat.snapshots}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Evaluations</p>
+                      <p className="text-sm font-mono font-medium">{heartbeat.evaluations}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Alerts</p>
+                      <p className="text-sm font-mono font-medium">{heartbeat.alerts}</p>
+                    </div>
+                  </div>
+                  {heartbeat.current_minute && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Processing: <span className="font-mono">{new Date(heartbeat.current_minute).toLocaleTimeString()}</span>
+                      {heartbeat.eta_seconds > 0 && (
+                        <span className="text-muted-foreground/50"> (next in {heartbeat.eta_seconds}s)</span>
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {run && (
                 <div>
                   <h3 className="text-sm font-semibold mb-2">Current Run</h3>
@@ -341,21 +360,11 @@ export default function StrategyDetailPage() {
                       <span className="text-xs font-medium font-mono">#{run.id}</span>
                     </div>
                     <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
-                      <span className="text-xs text-muted-foreground">Status</span>
-                      <span className="text-xs font-medium">{run.status}</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
                       <span className="text-xs text-muted-foreground">Started</span>
                       <span className="text-xs font-medium font-mono">
                         {run.started_at
                           ? new Date(run.started_at).toLocaleString()
                           : "—"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
-                      <span className="text-xs text-muted-foreground">Signals</span>
-                      <span className="text-xs font-medium font-mono">
-                        {run.signals_count}
                       </span>
                     </div>
                   </div>
@@ -365,7 +374,7 @@ export default function StrategyDetailPage() {
               {strategyRuns.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold mb-2">Run History</h3>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {strategyRuns.map((r) => (
                       <div
                         key={r.id}

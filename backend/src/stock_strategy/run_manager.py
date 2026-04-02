@@ -16,6 +16,7 @@ from .alerts import DatabaseAlertSink
 from .config import load_config
 from .db import DatabaseClient
 from .engine import StrategyEngine
+from .events import broadcaster
 from .instruments import INDEX_SPOT_SYMBOLS
 from .kite_client import KiteConnectClient, prepare_live_subscription
 from .logging_setup import get_logger
@@ -250,6 +251,7 @@ class RunManager:
             ticks_enqueued = 0
             ticks_processed = 0
             snapshots_emitted = 0
+            prev_alerts = 0
             stale_warned: set[str] = set()
             token_expires_at = _compute_token_expiry()
 
@@ -284,20 +286,41 @@ class RunManager:
                         snapshots_emitted += len(snapshots)
                         now = datetime.now(tz=UTC)
                         for snap in snapshots:
-                            engine.process_snapshot(snap, received_at=now)
+                            result = engine.process_snapshot(snap, received_at=now)
+                            if result is not None:
+                                # Broadcast every evaluation (not just alerts) so UI can show activity
+                                broadcaster.put_nowait("evaluation", {
+                                    "run_id": run_id,
+                                    "strategy_id": strategy_id,
+                                    "timestamp": snap.timestamp.isoformat(),
+                                    "index_name": snap.index,
+                                    "signal": result.signal.value,
+                                    "confidence": result.confidence,
+                                    "total_delta": result.total_delta,
+                                    "weighted_total_delta": result.weighted_total_delta,
+                                    "votes": result.votes,
+                                    "reason": result.reason,
+                                    "spot_price": snap.spot_price,
+                                    "atm_strike": snap.atm_strike,
+                                    "was_emitted": engine.stats.emitted_alerts > prev_alerts,
+                                })
+                                prev_alerts = engine.stats.emitted_alerts
                     except TimeoutError:
                         pass
 
                     now_utc = datetime.now(tz=UTC)
                     if now_utc - last_heartbeat_at >= heartbeat_interval:
-                        aggregator.telemetry()
+                        telem = aggregator.telemetry()
+                        current_min_iso = None
+                        eta_seconds = 0
                         if aggregator.current_minute is None:
                             waiting_detail = "waiting for first tick"
                         else:
+                            current_min_iso = aggregator.current_minute.isoformat()
                             next_minute_close = aggregator.current_minute + timedelta(minutes=1)
                             eta_seconds = max(0, int((next_minute_close - now_utc).total_seconds()))
                             waiting_detail = (
-                                f"collecting current_minute={aggregator.current_minute.isoformat()} "
+                                f"collecting current_minute={current_min_iso} "
                                 f"eta_seconds={eta_seconds}"
                             )
                         logger.info(
@@ -305,10 +328,28 @@ class RunManager:
                             run_id, strategy_id, waiting_detail, ticks_processed,
                             snapshots_emitted, engine.stats.emitted_alerts,
                         )
+
+                        stale = aggregator.detect_stale_indices(now_utc, max_age_seconds=180)
+                        broadcaster.put_nowait("heartbeat", {
+                            "run_id": run_id,
+                            "strategy_id": strategy_id,
+                            "status": "running",
+                            "ticks_processed": ticks_processed,
+                            "snapshots": snapshots_emitted,
+                            "alerts": engine.stats.emitted_alerts,
+                            "evaluations": engine.stats.evaluations,
+                            "transitions": engine.stats.transitions,
+                            "current_minute": current_min_iso,
+                            "eta_seconds": eta_seconds,
+                            "stale_indices": stale,
+                            "spot_ticks": telem.get("spot_ticks", 0),
+                            "option_ticks": telem.get("option_ticks", 0),
+                        })
+
                         last_heartbeat_at = now_utc
 
-                    stale = aggregator.detect_stale_indices(datetime.now(tz=UTC), max_age_seconds=180)
-                    stale_set = set(stale)
+                    stale_now = aggregator.detect_stale_indices(datetime.now(tz=UTC), max_age_seconds=180)
+                    stale_set = set(stale_now)
                     new_stale = sorted(stale_set - stale_warned)
                     recovered = sorted(stale_warned - stale_set)
                     if new_stale:
