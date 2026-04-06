@@ -1,0 +1,31 @@
+analyser/Makefile
+  488359665bf2324b 1-23
+analyser/pyproject.toml
+  488359665bf2324b 4,6-11
+analyser/analyser.py
+  488359665bf2324b 15-17,30,32-33
+analyser/.env.example
+  488359665bf2324b 1-6
+analyser/README.md
+  488359665bf2324b 1-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "4c1ab6fe3092beba1d2405600cc816238a7b26f5",
+  "prompts": {
+    "488359665bf2324b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a597a52-0195-412c-abe0-a3d6ccabd255",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta",
+      "messages": [],
+      "total_additions": 1385,
+      "total_deletions": 16,
+      "accepted_lines": 159,
+      "overriden_lines": 0
+    }
+  }
+}
