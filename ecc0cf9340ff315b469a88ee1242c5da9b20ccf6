@@ -1,0 +1,25 @@
+README.md
+  488359665bf2324b 3,5,7-10,12,16,18-20,22-25,28,30,32,35-39,42,44-53,55,57-61,63,65,67,70-73,76,78-80,82-85,87-89,91,93-99,101,103-109
+analyser/README.md
+  488359665bf2324b 11-12,16-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "ecc0cf9340ff315b469a88ee1242c5da9b20ccf6",
+  "prompts": {
+    "488359665bf2324b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a597a52-0195-412c-abe0-a3d6ccabd255",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta",
+      "messages": [],
+      "total_additions": 94,
+      "total_deletions": 172,
+      "accepted_lines": 94,
+      "overriden_lines": 0
+    }
+  }
+}
