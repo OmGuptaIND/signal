@@ -1,11 +1,13 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Check, Copy, ExternalLink, LogOut, Zap } from "lucide-react";
+import { Check, Copy, ExternalLink, LogOut, Settings, Zap } from "lucide-react";
 
 function Home() {
+	const { data: session } = useSession();
 	const searchParams = useSearchParams();
 	const tokenFromUrl = searchParams.get("token");
 	const error = searchParams.get("error");
@@ -127,15 +129,26 @@ function Home() {
 					</button>
 				)}
 
-				{/* Sign out */}
-				<button
-					type="button"
-					onClick={() => signOut({ callbackUrl: "/login" })}
-					className="flex w-full items-center justify-center gap-2 py-2 text-xs text-[#555] transition-colors hover:text-[#888]"
-				>
-					<LogOut className="size-3" />
-					Sign out
-				</button>
+				{/* Footer links */}
+				<div className="flex items-center justify-center gap-4 pt-2">
+					{session?.user?.isAdmin && (
+						<Link
+							href="/admin"
+							className="flex items-center gap-1.5 text-xs text-[#555] transition-colors hover:text-[#888]"
+						>
+							<Settings className="size-3" />
+							Admin
+						</Link>
+					)}
+					<button
+						type="button"
+						onClick={() => signOut({ callbackUrl: "/login" })}
+						className="flex items-center gap-1.5 text-xs text-[#555] transition-colors hover:text-[#888]"
+					>
+						<LogOut className="size-3" />
+						Sign out
+					</button>
+				</div>
 			</div>
 		</div>
 	);

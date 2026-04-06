@@ -34,7 +34,7 @@ function LoginForm() {
 					{error && (
 						<div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
 							{error === "AccessDenied"
-								? "Your email is not on the allowed list."
+								? "You need an invite code to join. Ask an existing member."
 								: "Sign in failed. Please try again."}
 						</div>
 					)}
