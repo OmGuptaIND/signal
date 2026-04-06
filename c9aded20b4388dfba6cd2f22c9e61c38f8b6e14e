@@ -1,0 +1,71 @@
+.gitignore
+  488359665bf2324b 2-3,6
+.claude/launch.json
+  488359665bf2324b 6-7
+frontend/package.json
+  488359665bf2324b 2-27
+frontend/src/lib/auth.ts
+  488359665bf2324b 4-8,21-24
+frontend/src/middleware.ts
+  488359665bf2324b 5
+frontend/src/app/page.tsx
+  488359665bf2324b 1-150
+frontend/src/app/api/kite/login/route.ts
+  488359665bf2324b 1-21
+frontend/.env.example
+  488359665bf2324b 8-14
+frontend/src/app/login/page.tsx
+  488359665bf2324b 10,13,17,20-22,26-32,34-40,42-68
+frontend/src/styles/globals.css
+  488359665bf2324b 8-9,14
+frontend/src/app/api/kite/callback/route.ts
+  488359665bf2324b 1-63
+frontend/src/app/layout.tsx
+  488359665bf2324b 5,8-10,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "c9aded20b4388dfba6cd2f22c9e61c38f8b6e14e",
+  "prompts": {
+    "488359665bf2324b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a597a52-0195-412c-abe0-a3d6ccabd255",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta",
+      "messages": [],
+      "total_additions": 338,
+      "total_deletions": 593,
+      "accepted_lines": 337,
+      "overriden_lines": 0
+    },
+    "95f16de364a5790b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e2930bb-976c-49bd-a065-7f5e23f293db",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "b28423e0f7ccf79f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ae4c7ba8-201c-4ea1-bfcb-d412cd176c5c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Om Gupta <omgupta0720@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
