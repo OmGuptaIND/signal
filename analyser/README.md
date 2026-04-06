@@ -8,8 +8,25 @@ Tracks OI deltas, flow direction, CMP, VWAP, PCR, support/resistance, shift dete
 
 ## Prerequisites
 
+- **Python 3.12+**
+- **uv** — fast Python package manager
 - A **Zerodha Kite Connect** API key and access token
 - Get your access token from the [Monies web app](https://signal.dataprism.in) (Google sign-in → Connect Kite → copy token)
+
+### Install uv
+
+```bash
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or via Homebrew
+brew install uv
+```
+
+After installing, restart your terminal or run `source $HOME/.local/bin/env`.
 
 ---
 

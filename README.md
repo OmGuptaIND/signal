@@ -1,204 +1,109 @@
 # Monies
 
-Real-time options open-interest signal engine for Indian equity indices. Streams live market data from Zerodha Kite, computes OI features across multiple timeframes, evaluates trading strategies, and delivers signals to a live dashboard.
+Invite-only web app for Zerodha Kite token management + a standalone OI flow analyser for NIFTY, BANKNIFTY, and SENSEX.
 
-## What It Does
+## How it works
 
-Monies watches options open interest for **NIFTY**, **BANKNIFTY**, and **SENSEX** in real time. It aggregates tick-level OI data into 1-minute, 3-minute, and 5-minute features, runs them through a weighted voting strategy (Template D), and emits directional signals (LONG_BIAS, SHORT_BIAS, NEUTRAL) with confidence scores. Signals stream to a dark-themed React dashboard via SSE.
+1. **Sign in** with Google (invite-only)
+2. **Connect Kite** — redirects to Zerodha, exchanges token automatically
+3. **Copy your access token** — use it in the analyser
+4. **Run the analyser** — live OI flow, support/resistance, shift detection
 
-This is an **alerts-only** engine -- it does not place orders.
-
-## Architecture
-
-```
-Zerodha Kite WebSocket
-        |
-        v
-  [Tick Queue]  ──>  OI Aggregator (1m bars)
-                          |
-                          v
-                   Timeframe Buffer (1m/3m/5m)
-                          |
-                          v
-                   Template D Strategy
-                          |
-                          v
-                   Alert Sink (PostgreSQL)
-                          |
-                          v
-                   SSE Broadcaster  ──>  React Dashboard
-```
-
-## Tech Stack
-
-| Layer    | Tech |
-|----------|------|
-| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS 4, Jotai, shadcn/ui |
-| Backend  | Python 3.11+, FastAPI, SQLAlchemy 2.0, Alembic |
-| Data     | Zerodha Kite WebSocket + REST API (kiteconnect SDK) |
-| Database | PostgreSQL |
-| Realtime | Server-Sent Events (SSE) |
-
-## Project Structure
+## Project structure
 
 ```
 Monies/
-├── backend/                    # Python FastAPI strategy engine
-│   ├── src/stock_strategy/
-│   │   ├── api/                # REST + SSE endpoints
-│   │   ├── strategy/           # Template D + base interface
-│   │   ├── engine.py           # Core evaluation loop
-│   │   ├── oi_aggregator.py    # Tick -> 1m OI features
-│   │   ├── timeframes.py       # 1m -> 3m/5m derivation
-│   │   ├── run_manager.py      # Strategy run lifecycle
-│   │   ├── alerts.py           # DB sink with dedup
-│   │   ├── kite_client.py      # Kite WebSocket wrapper
-│   │   └── models_db.py        # SQLAlchemy tables
-│   ├── migrations/             # Alembic DB migrations
-│   ├── tests/
-│   ├── config.yaml             # Strategy hyperparameters
-│   └── Makefile
-│
-├── frontend/                   # Next.js dashboard
+├── frontend/          # Next.js app (auth + Kite token)
 │   ├── src/
-│   │   ├── app/                # Pages + API routes (auth proxy)
-│   │   ├── components/         # Dashboard UI + shadcn/ui
-│   │   ├── store.ts            # Jotai global state
-│   │   └── lib/                # Types + utils
-│   └── package.json
+│   │   ├── app/       # Pages: login, home, invite, admin
+│   │   └── lib/       # NextAuth + Drizzle ORM
+│   └── drizzle.config.ts
 │
-└── spec/                       # Product & technical specs
+└── analyser/          # Python OI analyser (single file)
+    ├── analyser.py    # Everything in one file
+    ├── Makefile
+    └── pyproject.toml # uv project
 ```
 
-## Prerequisites
+## Frontend — Token app
 
-- Python 3.11+
-- Node.js 18+
-- PostgreSQL 12+
-- Zerodha Kite API credentials ([kite.trade](https://kite.trade))
-- `uv` package manager (for Python)
+Next.js 15 app with Google OAuth, PostgreSQL invite system, and Kite Connect integration.
 
-## Quick Start
-
-### 1. Backend
-
-```bash
-cd backend
-cp .env.example .env
-# Edit .env: set KITE_API_KEY, KITE_API_SECRET, DATABASE_URL, FRONTEND_BASE_URL
-
-make install        # uv sync
-make db-upgrade     # run migrations
-make dev            # start API on :8000
-```
-
-### 2. Frontend
+### Setup
 
 ```bash
 cd frontend
-cp .env.example .env
-# Edit .env: set NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:8000
-
-npm install
-npm run dev         # start on :3000
+cp .env.example .env   # fill in credentials
+bun install
+bun run db:push        # create database tables
+bun run dev            # http://localhost:3000
 ```
 
-### 3. Connect & Trade
+### Environment variables
 
-1. Open http://localhost:3000
-2. Click **Connect Kite** and log in with Zerodha
-3. Backend automatically starts a strategy run
-4. Signals stream to the dashboard in real time
+| Variable | Description |
+|----------|-------------|
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth secret |
+| `NEXTAUTH_SECRET` | Session encryption key |
+| `NEXTAUTH_URL` | App URL (`http://localhost:3000` or your domain) |
+| `KITE_API_KEY` | Zerodha Kite API key |
+| `KITE_API_SECRET` | Zerodha Kite API secret |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `ADMIN_EMAIL` | First sign-in with this email becomes admin |
 
-## Environment Variables
+### Features
 
-### Backend
+- Google sign-in with email allowlist (DB-backed)
+- Invite code system — existing users can invite others
+- Admin page (`/admin`) — manage users and invite codes
+- Kite OAuth flow — token exchange via Next.js API routes
+- Token display with one-click copy
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `KITE_API_KEY` | Yes | Zerodha Kite API key |
-| `KITE_API_SECRET` | Yes | Zerodha Kite API secret |
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `FRONTEND_BASE_URL` | Yes | Frontend URL for OAuth redirect (e.g. `http://localhost:3000`) |
-| `KITE_ACCESS_TOKEN` | No | Pre-generated access token (skips OAuth) |
-| `KITE_ACCESS_TOKEN_ONLY` | No | Set `true` to use only the access token |
-| `LOG_LEVEL` | No | `DEBUG`, `INFO`, `WARNING`, `ERROR` (default: `INFO`) |
-| `LOG_JSON` | No | `true` for JSON-formatted logs |
-| `LOG_FILE` | No | File path for rotating log output |
-| `DRY_RUN` | No | Informational flag (alerts-only mode) |
+## Analyser — OI flow engine
 
-### Frontend
+Single Python file that connects to Kite and runs live analysis.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_BACKEND_URL` | Yes | Backend API base URL |
-
-## Strategy Configuration
-
-Edit `backend/config.yaml`:
-
-```json
-{
-  "symbols": ["NIFTY", "BANKNIFTY", "SENSEX"],
-  "strike_window": 5,
-  "template_d": {
-    "weights": {"1m": 0.5, "3m": 0.3, "5m": 0.2},
-    "min_oi_delta": 1.0,
-    "signal_threshold": 0.12,
-    "min_consensus_weight": 0.5,
-    "confidence_scale": 2.5
-  }
-}
-```
-
-- **weights**: Timeframe voting weights (must sum to 1.0)
-- **signal_threshold**: Minimum weighted score to emit a signal
-- **min_oi_delta**: Minimum absolute OI delta to consider directional
-- **dedup_confidence_delta**: Skip signal if confidence change < this value
-
-## Useful Commands
+### Run locally
 
 ```bash
-# Backend (from backend/)
-make dev                      # Start API with auto-reload
-make test                     # Run test suite
-make lint                     # Ruff linter
-make run-live                 # Start live engine
-make run-replay REPLAY_INPUT=data/replay_sample.csv
-make check-kite-api           # Test Kite connectivity
-make generate-access-token    # Generate and save access token
-make db-upgrade               # Apply pending migrations
-make db-migrate m="desc"      # Create new migration
-
-# Frontend (from frontend/)
-npm run dev                   # Dev server
-npm run build                 # Production build
+cd analyser
+make setup             # copies .env + installs deps via uv
+# edit .env with your KITE_API_KEY and KITE_ACCESS_TOKEN
+make run
 ```
 
-## API Endpoints
+### Run on Google Colab
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/health` | Health check |
-| GET | `/kite/login-url` | Get Kite OAuth login URL |
-| GET | `/kite/callback` | OAuth callback (handles token exchange) |
-| GET | `/kite/connectivity` | Test Kite API connection |
-| GET | `/api/signals/stream` | SSE stream of live signals |
-| GET | `/api/signals/history` | Last 50 signals from DB |
-| GET | `/api/auth/status` | Kite connection status |
-| GET | `/api/runs` | List recent strategy runs |
-| GET | `/api/runs/active` | Current active run |
-| POST | `/api/runs/start` | Start a new strategy run |
-| POST | `/api/runs/{id}/stop` | Stop a running strategy |
+```python
+# Cell 1
+!pip install kiteconnect pandas pytz python-dotenv
 
-## Database
+# Cell 2
+import os
+os.environ["KITE_API_KEY"] = "your_api_key"
+os.environ["KITE_ACCESS_TOKEN"] = "paste_from_app"
 
-Three tables managed by Alembic migrations:
+# Cell 3 — upload analyser.py to Colab, then:
+!python analyser.py
+```
 
-- **kite_auth_status** -- Singleton Kite connection state
-- **strategy_runs** -- Run lifecycle (status, timestamps, token expiry, signal count)
-- **alert_signals** -- Persisted signals (index, signal type, confidence, deltas, spot price, reason)
+### What it tracks
 
-## License
+- **OI deltas** — CE/PE open interest changes per strike
+- **Flow** — Bullish / Bearish / Neutral per strike + overall
+- **Support / Resistance** — max PE OI / max CE OI strikes
+- **Shift detection** — S/R and ATM movement alerts
+- **VWAP signals** — price vs VWAP per strike
+- **PCR** — Put-Call Ratio per strike + index level
+- **ATM tracking** — color-coded: 🟢 unchanged, 🔵 shifted, 🟠 previous
 
-Private.
+## Tech stack
+
+| Component | Tech |
+|-----------|------|
+| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS 4 |
+| Auth | NextAuth 5 (Google OAuth) |
+| Database | PostgreSQL + Drizzle ORM |
+| Analyser | Python 3.12+, kiteconnect, pandas |
+| Package managers | bun (frontend), uv (analyser) |
