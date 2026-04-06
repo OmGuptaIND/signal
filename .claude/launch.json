@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "frontend-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "frontend"],
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && cd /Users/omg/Desktop/Monies/frontend && SKIP_ENV_VALIDATION=1 npm run dev"],
       "port": 3000,
       "autoPort": true
     }

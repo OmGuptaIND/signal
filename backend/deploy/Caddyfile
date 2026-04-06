@@ -1,3 +1,0 @@
-signal-backend.dataprism.in {
-	reverse_proxy backend:8000
-}
